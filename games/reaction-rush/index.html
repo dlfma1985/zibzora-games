@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#070b14" />
+  <title>Reaction Rush — Zibzora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg-deep: #070b14;
+      --bg-panel: #0c1220;
+      --bg-wait: #121a2e;
+      --bg-go: #e8f7ff;
+      --go-text: #061018;
+      --accent: #5ef0d0;
+      --accent-hot: #ffc857;
+      --text: #e8eef7;
+      --muted: #8b9bb4;
+      --danger: #ff6b8a;
+      --ok: #5ef0d0;
+      --font-ui: "Noto Sans KR", system-ui, sans-serif;
+      --font-display: Orbitron, "Noto Sans KR", sans-serif;
+      --safe-top: env(safe-area-inset-top, 0px);
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: var(--font-ui);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+      min-height: 100dvh;
+      background:
+        radial-gradient(120% 80% at 50% -10%, rgba(94, 240, 208, 0.12), transparent 55%),
+        radial-gradient(80% 50% at 100% 100%, rgba(255, 200, 87, 0.08), transparent 50%),
+        var(--bg-deep);
+    }
+
+    .chrome {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: calc(0.55rem + var(--safe-top)) 0.9rem 0.55rem;
+      border-bottom: 1px solid rgba(94, 240, 208, 0.14);
+      background: rgba(7, 11, 20, 0.85);
+      backdrop-filter: blur(8px);
+    }
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+      min-width: 0;
+    }
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-weight: 700;
+    }
+    .brand-game {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .best {
+      text-align: right;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .best strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      color: var(--accent-hot);
+      letter-spacing: 0.04em;
+    }
+
+    .stage {
+      flex: 1 1 auto;
+      display: flex;
+      position: relative;
+      min-height: 0;
+      padding: 0.75rem;
+      padding-bottom: calc(0.75rem + var(--safe-bottom));
+    }
+
+    .panel {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      border-radius: 1rem;
+      overflow: hidden;
+      border: 1px solid rgba(94, 240, 208, 0.16);
+      background: var(--bg-panel);
+      cursor: pointer;
+      transition: background-color 0.12s ease, color 0.12s ease, box-shadow 0.2s ease;
+      outline: none;
+      text-align: center;
+      padding: 1.25rem;
+    }
+    .panel:focus-visible {
+      box-shadow: 0 0 0 3px rgba(94, 240, 208, 0.45);
+    }
+
+    .panel[data-phase="idle"] {
+      background:
+        linear-gradient(160deg, rgba(94, 240, 208, 0.08), transparent 45%),
+        var(--bg-panel);
+    }
+    .panel[data-phase="wait"] {
+      background: var(--bg-wait);
+      animation: waitPulse 1.4s ease-in-out infinite;
+    }
+    .panel[data-phase="go"] {
+      background: var(--bg-go);
+      color: var(--go-text);
+      animation: goFlash 0.35s ease-out;
+      box-shadow: inset 0 0 0 4px rgba(6, 16, 24, 0.12);
+    }
+    .panel[data-phase="early"] {
+      background: #2a1220;
+      border-color: rgba(255, 107, 138, 0.35);
+    }
+    .panel[data-phase="result"] {
+      background:
+        linear-gradient(180deg, rgba(94, 240, 208, 0.1), transparent 40%),
+        var(--bg-panel);
+      animation: resultReveal 0.45s cubic-bezier(0.2, 0.85, 0.25, 1);
+    }
+
+    @keyframes waitPulse {
+      0%, 100% { box-shadow: inset 0 0 0 0 rgba(94, 240, 208, 0); }
+      50% { box-shadow: inset 0 0 48px 0 rgba(94, 240, 208, 0.08); }
+    }
+    @keyframes goFlash {
+      0% { filter: brightness(1.45); transform: scale(1.01); }
+      100% { filter: brightness(1); transform: scale(1); }
+    }
+    @keyframes resultReveal {
+      0% { opacity: 0.55; transform: translateY(10px) scale(0.98); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .panel[data-phase="wait"],
+      .panel[data-phase="go"],
+      .panel[data-phase="result"] { animation: none; }
+    }
+
+    .cue {
+      font-family: var(--font-display);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      line-height: 1.15;
+      margin: 0;
+    }
+    .cue-lg { font-size: clamp(1.8rem, 8vw, 3.2rem); }
+    .cue-md { font-size: clamp(1.35rem, 5.5vw, 2.2rem); }
+
+    .sub {
+      margin: 0.75rem 0 0;
+      max-width: 22rem;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+      font-weight: 400;
+    }
+    .panel[data-phase="go"] .sub { color: rgba(6, 16, 24, 0.65); }
+
+    .rules {
+      margin: 1rem 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.85rem;
+      line-height: 1.55;
+      text-align: left;
+    }
+    .rules li {
+      position: relative;
+      padding-left: 1rem;
+      margin: 0.2rem 0;
+    }
+    .rules li::before {
+      content: "›";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    .cta {
+      margin-top: 1.35rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: 999px;
+      border: 1px solid rgba(94, 240, 208, 0.45);
+      background: rgba(94, 240, 208, 0.12);
+      color: var(--accent);
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
+    .panel[data-phase="go"] .cta {
+      border-color: rgba(6, 16, 24, 0.25);
+      background: rgba(6, 16, 24, 0.08);
+      color: var(--go-text);
+    }
+
+    .ms {
+      font-family: var(--font-display);
+      font-size: clamp(2.6rem, 14vw, 4.5rem);
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      margin: 0.35rem 0 0;
+      color: var(--accent);
+    }
+    .tier {
+      display: inline-block;
+      margin-top: 0.55rem;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent-hot);
+    }
+    .share {
+      margin-top: 1rem;
+      width: min(100%, 22rem);
+      padding: 0.7rem 0.85rem;
+      border-radius: 0.65rem;
+      border: 1px dashed rgba(139, 155, 180, 0.35);
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      justify-content: center;
+      margin-top: 1.1rem;
+    }
+    .btn {
+      appearance: none;
+      border: 1px solid rgba(94, 240, 208, 0.35);
+      background: rgba(94, 240, 208, 0.1);
+      color: var(--accent);
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 0.65rem 1.1rem;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      min-height: 2.75rem;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-ghost {
+      background: transparent;
+      border-color: rgba(139, 155, 180, 0.35);
+      color: var(--muted);
+    }
+    .early-mark { color: var(--danger); }
+
+    .hint-bar {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0.85rem;
+      text-align: center;
+      font-size: 0.72rem;
+      color: rgba(139, 155, 180, 0.8);
+      pointer-events: none;
+    }
+    .panel[data-phase="go"] .hint-bar { color: rgba(6, 16, 24, 0.45); }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="chrome">
+      <div class="brand">
+        <span class="brand-name">Zibzora</span>
+        <span class="brand-game">Reaction Rush</span>
+      </div>
+      <div class="best" aria-live="polite">
+        최고 기록
+        <strong id="bestDisplay">—</strong>
+      </div>
+    </header>
+
+    <main class="stage">
+      <div
+        id="panel"
+        class="panel"
+        data-phase="idle"
+        role="button"
+        tabindex="0"
+        aria-describedby="live"
+      >
+        <div id="view"></div>
+        <p id="live" class="visually-hidden" aria-live="assertive"></p>
+        <div class="hint-bar" id="hintBar"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var STORAGE_KEY = "zibzora.reactionRush.bestMs";
+      var MIN_WAIT = 1200;
+      var MAX_WAIT = 4200;
+
+      var panel = document.getElementById("panel");
+      var view = document.getElementById("view");
+      var live = document.getElementById("live");
+      var hintBar = document.getElementById("hintBar");
+      var bestDisplay = document.getElementById("bestDisplay");
+
+      var phase = "idle"; // idle | wait | go | early | result
+      var waitTimer = null;
+      var goAt = 0;
+      var lastResultMs = null;
+      var lastShareText = "";
+      var pointerDown = false;
+
+      function loadBest() {
+        try {
+          var raw = localStorage.getItem(STORAGE_KEY);
+          if (raw == null) return null;
+          var n = Number(raw);
+          return Number.isFinite(n) && n > 0 ? Math.round(n) : null;
+        } catch (e) {
+          return null;
+        }
+      }
+
+      function saveBest(ms) {
+        var prev = loadBest();
+        if (prev == null || ms < prev) {
+          try {
+            localStorage.setItem(STORAGE_KEY, String(ms));
+          } catch (e) { /* ignore */ }
+          return true;
+        }
+        return false;
+      }
+
+      function formatBest(ms) {
+        return ms == null ? "—" : ms + " ms";
+      }
+
+      function refreshBest() {
+        bestDisplay.textContent = formatBest(loadBest());
+      }
+
+      function clearWait() {
+        if (waitTimer != null) {
+          clearTimeout(waitTimer);
+          waitTimer = null;
+        }
+      }
+
+      function setPhase(next) {
+        phase = next;
+        panel.dataset.phase = next;
+      }
+
+      function announce(msg) {
+        live.textContent = "";
+        // Force re-announce for identical strings
+        requestAnimationFrame(function () {
+          live.textContent = msg;
+        });
+      }
+
+      function tierFor(ms) {
+        if (ms < 200) return { label: "번개", key: "lightning" };
+        if (ms < 300) return { label: "빠름", key: "fast" };
+        if (ms < 400) return { label: "보통", key: "avg" };
+        return { label: "느림", key: "slow" };
+      }
+
+      function escapeHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function renderIdle() {
+        setPhase("idle");
+        hintBar.textContent = "화면을 탭하거나 클릭하세요";
+        view.innerHTML =
+          '<p class="cue cue-lg">반응속도 테스트</p>' +
+          '<p class="sub">색이 밝아지고 「지금!」이 뜨면 바로 탭하세요.</p>' +
+          '<ul class="rules">' +
+          "<li>준비 후 랜덤 대기</li>" +
+          "<li>신호 전에 누르면 무효</li>" +
+          "<li>밀리초(ms)로 기록</li>" +
+          "</ul>" +
+          '<div class="cta">시작하기</div>';
+        announce("준비 화면. 시작하려면 화면을 누르세요.");
+      }
+
+      function renderWait() {
+        setPhase("wait");
+        hintBar.textContent = "신호까지 기다리세요…";
+        view.innerHTML =
+          '<p class="cue cue-md">준비…</p>' +
+          '<p class="sub">화면이 밝아질 때까지 기다리세요</p>';
+        announce("대기 중. 신호까지 기다리세요.");
+      }
+
+      function renderGo() {
+        setPhase("go");
+        hintBar.textContent = "지금 탭!";
+        view.innerHTML =
+          '<p class="cue cue-lg">지금!</p>' +
+          '<p class="sub">가능한 한 빨리 탭하세요</p>';
+        announce("지금! 탭하세요.");
+      }
+
+      function renderEarly() {
+        setPhase("early");
+        hintBar.textContent = "";
+        view.innerHTML =
+          '<p class="cue cue-md early-mark">너무 일러요</p>' +
+          '<p class="sub">신호가 나오기 전에 눌렀습니다. 다시 도전!</p>' +
+          '<div class="cta">다시 시도</div>';
+        announce("너무 일러요. 다시 시도하세요.");
+      }
+
+      function renderResult(ms, isNewBest) {
+        setPhase("result");
+        hintBar.textContent = "";
+        var tier = tierFor(ms);
+        lastResultMs = ms;
+        lastShareText =
+          "Zibzora Reaction Rush\n반응속도 " +
+          ms +
+          " ms · " +
+          tier.label +
+          (isNewBest ? " · 신기록!" : "");
+
+        view.innerHTML =
+          '<p class="cue cue-md">결과</p>' +
+          '<p class="ms">' +
+          ms +
+          " <span style=\"font-size:0.4em;letter-spacing:0.08em\">ms</span></p>" +
+          '<span class="tier">' +
+          escapeHtml(tier.label) +
+          "</span>" +
+          (isNewBest
+            ? '<p class="sub" style="color:var(--accent-hot)">신기록 달성!</p>'
+            : '<p class="sub">다시 눌러 최고 기록을 갱신하세요</p>') +
+          '<pre class="share" id="shareText">' +
+          escapeHtml(lastShareText) +
+          "</pre>" +
+          '<div class="actions">' +
+          '<button type="button" class="btn" data-action="retry">다시 하기</button>' +
+          '<button type="button" class="btn btn-ghost" data-action="copy">결과 복사</button>' +
+          "</div>";
+        announce("결과 " + ms + " 밀리초, " + tier.label + (isNewBest ? ", 신기록" : ""));
+      }
+
+      function startRound() {
+        clearWait();
+        renderWait();
+        var delay = MIN_WAIT + Math.random() * (MAX_WAIT - MIN_WAIT);
+        waitTimer = setTimeout(function () {
+          waitTimer = null;
+          if (phase !== "wait") return;
+          goAt = performance.now();
+          renderGo();
+        }, delay);
+      }
+
+      function onValidHit() {
+        if (phase !== "go") return;
+        var ms = Math.max(1, Math.round(performance.now() - goAt));
+        var isNew = saveBest(ms);
+        refreshBest();
+        renderResult(ms, isNew);
+      }
+
+      function onEarlyHit() {
+        if (phase !== "wait") return;
+        clearWait();
+        renderEarly();
+      }
+
+      function handlePrimary() {
+        if (phase === "idle" || phase === "early" || phase === "result") {
+          startRound();
+          return;
+        }
+        if (phase === "wait") {
+          onEarlyHit();
+          return;
+        }
+        if (phase === "go") {
+          onValidHit();
+        }
+      }
+
+      panel.addEventListener("pointerdown", function (e) {
+        if (e.button != null && e.button !== 0) return;
+        // Let buttons handle their own clicks
+        if (e.target.closest && e.target.closest("[data-action]")) return;
+        pointerDown = true;
+        panel.setPointerCapture && panel.setPointerCapture(e.pointerId);
+        handlePrimary();
+      });
+
+      panel.addEventListener("pointerup", function () {
+        pointerDown = false;
+      });
+
+      panel.addEventListener("keydown", function (e) {
+        if (e.key === " " || e.key === "Enter") {
+          e.preventDefault();
+          handlePrimary();
+        }
+      });
+
+      panel.addEventListener("click", function (e) {
+        var btn = e.target.closest && e.target.closest("[data-action]");
+        if (!btn) return;
+        e.stopPropagation();
+        var action = btn.getAttribute("data-action");
+        if (action === "retry") {
+          startRound();
+          return;
+        }
+        if (action === "copy") {
+          var text = lastShareText || "";
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(
+              function () {
+                btn.textContent = "복사됨!";
+                setTimeout(function () {
+                  btn.textContent = "결과 복사";
+                }, 1200);
+              },
+              function () {
+                fallbackCopy(text, btn);
+              }
+            );
+          } else {
+            fallbackCopy(text, btn);
+          }
+        }
+      });
+
+      function fallbackCopy(text, btn) {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+          document.execCommand("copy");
+          btn.textContent = "복사됨!";
+        } catch (err) {
+          btn.textContent = "선택 후 복사";
+        }
+        document.body.removeChild(ta);
+        setTimeout(function () {
+          btn.textContent = "결과 복사";
+        }, 1200);
+      }
+
+      // Prevent double-fire from touch + synthetic mouse on some browsers
+      // Pointer Events unify this; keep preventDefault on context menu for long-press.
+      panel.addEventListener("contextmenu", function (e) {
+        e.preventDefault();
+      });
+
+      refreshBest();
+      renderIdle();
+    })();
+  </script>
+</body>
+</html>
