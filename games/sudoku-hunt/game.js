@@ -593,7 +593,10 @@
 
   function renderBoard() {
     const n = level.size;
-    boardEl.style.gridTemplateColumns = "repeat(" + n + ", 1fr)";
+    boardEl.classList.add("board");
+    boardEl.style.display = "grid";
+    boardEl.style.setProperty("--n", String(n));
+    boardEl.style.gridTemplateColumns = "repeat(" + n + ", minmax(0, 1fr))";
     boardEl.classList.toggle("won", showOpen);
     boardEl.replaceChildren();
     const badgeAt = new Map();

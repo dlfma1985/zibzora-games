@@ -97,7 +97,7 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   margin: 0 auto;
 }
 .lede { margin: 0; color: var(--muted); line-height: 1.5; }
-.mode-btn, .result-actions button, .dialog button, .stuck button {
+.mode-btn, .result-actions button:not(.cell), .dialog button:not(.cell), .stuck button:not(.cell) {
   width: 100%;
   text-align: left;
   font-size: 1.05rem;
@@ -118,9 +118,12 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 
 .play { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: 10px; }
 #board-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+#board,
 .board {
+  --n: 4;
   width: min(520px, calc(100vw - 24px));
   display: grid;
+  grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
   gap: 0;
   border: 2px solid var(--ink);
   border-radius: 12px;
@@ -133,9 +136,16 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   place-items: center;
   aspect-ratio: 1;
   min-width: 0;
+  width: auto;
+  max-width: 100%;
   border: 0;
   padding: 0;
   color: #24180f;
+}
+button.cell {
+  width: auto;
+  max-width: 100%;
+  min-width: 0;
 }
 [data-mode="treasure"] .cell { color: #f6edd8; }
 .cell.split-r { box-shadow: inset -2px 0 0 var(--ink); }
@@ -177,6 +187,7 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   animation: twinkle 1.4s ease-in-out infinite;
   pointer-events: none;
 }
+#board.won .glyph,
 .board.won .glyph { transform: translateY(-1px) scale(1.06); }
 
 .rA { background-color: #f6e2bf; background-image: radial-gradient(rgba(166, 98, 8, 0.7) 0.9px, transparent 1px); background-size: 7px 7px; }
