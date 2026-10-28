@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6efe4" />
+  <title>한집한냥</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true">
+    <symbol id="ico-cat" viewBox="0 0 64 64">
+      <path fill="currentColor" d="M14 30 20 12l8 14h8L44 12l6 18c6 4 8 16-2 24-6 4-12 6-16 6s-10-2-16-6c-10-8-8-20-2-24z"/>
+      <circle cx="26" cy="34" r="2.2" fill="#1b140e"/>
+      <circle cx="40" cy="34" r="2.2" fill="#1b140e"/>
+      <path fill="#1b140e" d="M31 40h2l-1 3z"/>
+    </symbol>
+    <symbol id="ico-box" viewBox="0 0 64 64">
+      <path fill="currentColor" d="M10 28h44l-6 26H16z"/>
+      <path fill="currentColor" d="m10 28 22-14 22 14-22 6z"/>
+      <path stroke="#1b140e" stroke-width="2" d="M32 20v14"/>
+    </symbol>
+    <symbol id="ico-box-open" viewBox="0 0 64 64">
+      <path fill="currentColor" d="M12 32h40l-5 22H17z"/>
+      <path fill="currentColor" d="m8 30 16-18 8 8 8-10 16 18-24 4z"/>
+    </symbol>
+    <symbol id="ico-paw" viewBox="0 0 64 64">
+      <ellipse cx="32" cy="42" rx="11" ry="9" fill="currentColor"/>
+      <circle cx="18" cy="26" r="5" fill="currentColor"/>
+      <circle cx="30" cy="18" r="5" fill="currentColor"/>
+      <circle cx="44" cy="20" r="5" fill="currentColor"/>
+      <circle cx="50" cy="32" r="4" fill="currentColor"/>
+    </symbol>
+    <symbol id="ico-dust" viewBox="0 0 64 64">
+      <circle cx="18" cy="36" r="4" fill="currentColor"/>
+      <circle cx="32" cy="24" r="3" fill="currentColor"/>
+      <circle cx="46" cy="38" r="5" fill="currentColor"/>
+    </symbol>
+    <symbol id="ico-heart" viewBox="0 0 64 64">
+      <path fill="currentColor" d="M32 54 14 36C6 28 8 14 20 14c6 0 10 4 12 8 2-4 6-8 12-8 12 0 14 14 6 22z"/>
+    </symbol>
+    <symbol id="ico-heart-empty" viewBox="0 0 64 64">
+      <path fill="none" stroke="currentColor" stroke-width="4" d="M32 52 16 36c-6-6-4-16 6-16 5 0 8 3 10 7 2-4 5-7 10-7 10 0 12 10 6 16z"/>
+    </symbol>
+    <symbol id="ico-tuna" viewBox="0 0 64 64">
+      <rect x="12" y="24" width="40" height="24" rx="4" fill="currentColor"/>
+      <ellipse cx="32" cy="24" rx="20" ry="7" fill="currentColor"/>
+      <ellipse cx="32" cy="24" rx="7" ry="3" fill="none" stroke="#1b140e" stroke-width="2"/>
+    </symbol>
+    <symbol id="ico-shovel" viewBox="0 0 64 64">
+      <path fill="currentColor" d="m38 8 16 16-8 8-16-16z"/>
+      <path stroke="currentColor" stroke-width="6" stroke-linecap="round" d="m36 26-22 28"/>
+    </symbol>
+    <symbol id="ico-lock" viewBox="0 0 64 64">
+      <rect x="16" y="28" width="32" height="24" rx="4" fill="currentColor"/>
+      <path fill="none" stroke="currentColor" stroke-width="5" d="M24 28v-8a8 8 0 0 1 16 0v8"/>
+    </symbol>
+  </svg>
+
+  <div id="app" data-mode="cat" data-screen="start">
+    <header class="top">
+      <button type="button" id="btn-back" class="text-btn" hidden>레벨</button>
+      <div class="top-mid">
+        <p id="top-kicker" class="kicker">한집한냥</p>
+        <p id="top-title" class="top-title">시작</p>
+      </div>
+      <div class="top-stats">
+        <p id="gold-pill" class="gold" hidden>골드 40</p>
+        <div id="hearts" class="hearts" hidden></div>
+        <button type="button" id="btn-timer" class="text-btn timer-btn" hidden>시간</button>
+        <button type="button" id="btn-pause" class="text-btn" hidden>일시정지</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="screen-start" class="screen start">
+        <h1>한집한냥</h1>
+        <p class="lede">행·열·색 구역마다 하나. 숨은 고양이와 보물을 찾으세요.</p>
+        <button type="button" id="pick-cat" class="mode-btn">
+          <span>고양이 찾기</span>
+          <small id="next-cat">다음 01</small>
+        </button>
+        <button type="button" id="pick-treasure" class="mode-btn">
+          <span>보물 찾기</span>
+          <small id="next-treasure">다음 01</small>
+        </button>
+      </section>
+
+      <section id="screen-select" class="screen" hidden>
+        <h1 id="select-heading">레벨</h1>
+        <p id="select-note" class="note" role="status"></p>
+        <div id="level-grid" class="lv-grid"></div>
+      </section>
+
+      <section id="screen-play" class="screen play" hidden>
+        <div id="board-wrap">
+          <div id="board" role="grid" aria-label="퍼즐 판"></div>
+        </div>
+        <p id="status" class="status" role="status"></p>
+        <div id="stuck" class="stuck" hidden>
+          <p>이 배치로는 끝낼 수 없어요</p>
+          <button type="button" id="btn-undo">마지막 확정 되돌리기</button>
+        </div>
+      </section>
+
+      <section id="screen-result" class="screen result" hidden>
+        <p id="result-stars" class="result-stars"></p>
+        <h1 id="result-line"></h1>
+        <p id="result-extra" class="lede"></p>
+        <p id="result-stats"></p>
+        <p id="result-gold"></p>
+        <div class="result-actions">
+          <button type="button" id="btn-next">다음 판</button>
+          <button type="button" id="btn-retry">다시</button>
+          <button type="button" id="btn-levels">레벨 선택</button>
+        </div>
+      </section>
+    </main>
+
+    <footer id="tools" class="tools" hidden>
+      <button type="button" class="tool is-on" data-tool="mark" aria-pressed="true">
+        <svg class="glyph" aria-hidden="true"><use href="#ico-cat"></use></svg>
+        <span>확정</span>
+      </button>
+      <button type="button" class="tool" data-tool="cross" aria-pressed="false">
+        <svg class="glyph" aria-hidden="true"><use href="#ico-paw"></use></svg>
+        <span>×</span>
+      </button>
+      <button type="button" class="tool" data-tool="erase" aria-pressed="false">
+        <svg class="glyph" aria-hidden="true"><use href="#ico-dust"></use></svg>
+        <span>지우개</span>
+      </button>
+      <button type="button" class="tool" id="btn-hint">
+        <svg class="glyph" id="hint-icon" aria-hidden="true"><use href="#ico-tuna"></use></svg>
+        <span id="hint-label">힌트 2</span>
+      </button>
+    </footer>
+  </div>
+
+  <div id="overlay" class="overlay" hidden>
+    <div id="dialog" class="dialog" role="dialog" aria-modal="true"></div>
+  </div>
+
+  <script src="levels.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
