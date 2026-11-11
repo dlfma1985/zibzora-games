@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f6efe4" />
+  <title>숨은그림찾기</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app" data-screen="start">
+    <header class="top">
+      <button type="button" id="btn-back" class="text-btn" hidden>처음</button>
+      <div class="top-mid">
+        <p class="kicker">숨은그림찾기</p>
+        <p id="top-title" class="top-title">시작</p>
+      </div>
+      <div class="top-stats">
+        <p id="progress" class="progress" hidden>0/0</p>
+        <p id="timer" class="timer" hidden>00:00</p>
+      </div>
+    </header>
+
+    <main>
+      <section id="screen-start" class="screen start">
+        <h1>숨은그림찾기</h1>
+        <p class="lede">목록을 보고 그림 속을 누르세요. 맞으면 찾은 것으로 표시됩니다.</p>
+        <p class="note">최고 기록은 이 기기에 남습니다.</p>
+        <div id="level-pick" class="level-pick"></div>
+        <noscript><p class="lede">스크립트를 켜면 플레이할 수 있어요.</p></noscript>
+      </section>
+
+      <section id="screen-play" class="screen play" hidden>
+        <div class="play-body">
+          <div id="stage" class="stage">
+            <div id="world" class="world">
+              <canvas id="scene" width="1600" height="900">연습 장면</canvas>
+              <img id="photo" alt="" draggable="false" hidden />
+              <div id="marks" class="layer"></div>
+              <div id="fx" class="layer"></div>
+            </div>
+          </div>
+          <div class="side">
+            <p id="status" class="status" role="status" aria-live="polite"></p>
+            <ul id="list" class="names"></ul>
+            <p class="hint">작은 물건은 확대하거나 두 손가락으로 키우세요.</p>
+            <div class="zoom-row">
+              <button type="button" id="zoom-out">축소</button>
+              <button type="button" id="zoom-reset">맞춤</button>
+              <button type="button" id="zoom-in">확대</button>
+            </div>
+            <button type="button" id="btn-retry" class="wide">다시</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-result" class="screen result" hidden>
+        <p class="kicker">다 찾았어요</p>
+        <h1 id="result-title"></h1>
+        <p id="result-count" class="lede"></p>
+        <p id="result-time" class="time">00:00</p>
+        <p id="result-best" class="lede"></p>
+        <div class="result-actions">
+          <button type="button" id="btn-home">목록으로</button>
+          <button type="button" id="btn-again">다시</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="levels.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
