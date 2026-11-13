@@ -28,6 +28,9 @@
   const timerEl = document.getElementById("timer");
   const titleEl = document.getElementById("top-title");
   const backBtn = document.getElementById("btn-back");
+  const fsBtn = document.getElementById("btn-fullscreen");
+  const listBtn = document.getElementById("btn-list");
+  const playBody = document.getElementById("play-body");
   const zoomOutBtn = document.getElementById("zoom-out");
   const zoomInBtn = document.getElementById("zoom-in");
   const zoomResetBtn = document.getElementById("zoom-reset");
@@ -48,6 +51,8 @@
   let view = { s: 1, x: 0, y: 0 };
   const pointers = new Map();
   let pinchBase = null;
+  let listOpen = true;
+  let fsTouchAt = 0;
 
   function validItem(item) {
     if (!item || typeof item.name !== "string" || !item.name.trim()) return false;
@@ -176,12 +181,61 @@
     statusEl.textContent = text;
   }
 
+  function currentFullscreen() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function syncFullscreenButton() {
+    if (!fsBtn) return;
+    const on = Boolean(currentFullscreen());
+    fsBtn.classList.toggle("is-on", on);
+    fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    fsBtn.textContent = on ? "전체 화면 종료" : "전체 화면";
+  }
+
+  function toggleFullscreen() {
+    if (!fsBtn) return;
+    if (currentFullscreen()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!exit) return;
+      const done = exit.call(document);
+      if (done && done.catch) done.catch(function () {});
+      return;
+    }
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) {
+      fsBtn.textContent = "전체 화면 불가";
+      return;
+    }
+    let done;
+    try {
+      done = req.call(el, { navigationUI: "hide" });
+    } catch (err) {
+      try { done = req.call(el); } catch (err2) {
+        fsBtn.textContent = "전체 화면 불가";
+        return;
+      }
+    }
+    if (done && done.catch) done.catch(function () { fsBtn.textContent = "전체 화면 불가"; });
+  }
+
+  function syncListButton() {
+    if (!listBtn || !playBody) return;
+    const playing = screen === "play";
+    listBtn.hidden = !playing;
+    listBtn.setAttribute("aria-expanded", listOpen ? "true" : "false");
+    listBtn.textContent = listOpen ? "목록 접기" : "목록 열기";
+    playBody.classList.toggle("is-list-collapsed", !listOpen);
+  }
+
   function showScreen(name) {
     screen = name;
     app.dataset.screen = name;
     document.getElementById("screen-start").hidden = name !== "start";
     document.getElementById("screen-play").hidden = name !== "play";
     document.getElementById("screen-result").hidden = name !== "result";
+    syncListButton();
     paintChrome();
   }
 
@@ -847,6 +901,25 @@
   }
 
   backBtn.addEventListener("click", showStart);
+  if (fsBtn) {
+    fsBtn.addEventListener("pointerup", function (e) {
+      if (e.pointerType === "mouse") return;
+      fsTouchAt = Date.now();
+      toggleFullscreen();
+    });
+    fsBtn.addEventListener("click", function () {
+      if (Date.now() - fsTouchAt < 800) return;
+      toggleFullscreen();
+    });
+  }
+  if (listBtn) {
+    listBtn.addEventListener("click", function () {
+      listOpen = !listOpen;
+      syncListButton();
+    });
+  }
+  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
   document.getElementById("btn-home").addEventListener("click", showStart);
   document.getElementById("btn-retry").addEventListener("click", function () {
     if (level) startId(level.id);
@@ -896,12 +969,17 @@
     }
   });
 
-  window.addEventListener("resize", function () {
-    if (screen === "play") {
-      clampView();
-      applyView();
-    }
-  });
+  function refitView() {
+    if (screen !== "play") return;
+    clampView();
+    applyView();
+  }
+
+  window.addEventListener("resize", refitView);
+  if (typeof ResizeObserver === "function") {
+    const stageObserver = new ResizeObserver(refitView);
+    stageObserver.observe(stage);
+  }
 
   document.addEventListener("visibilitychange", function () {
     if (screen !== "play" || pendingWin) return;
@@ -911,5 +989,6 @@
 
   resetZoom();
   paintLevels();
+  syncFullscreenButton();
   showScreen("start");
 })();
