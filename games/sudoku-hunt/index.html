@@ -6,6 +6,11 @@
   <meta name="theme-color" content="#f6efe4" />
   <title>한집한냥</title>
   <link rel="stylesheet" href="style.css" />
+  <script>
+    try {
+      if (window.top === window.self) document.documentElement.classList.add("is-top");
+    } catch (err) { /* framed page keeps the iframe height */ }
+  </script>
 </head>
 <body>
   <svg class="sprite" aria-hidden="true">
@@ -59,16 +64,21 @@
 
   <div id="app" data-mode="cat" data-screen="start">
     <header class="top">
-      <button type="button" id="btn-back" class="text-btn" hidden>레벨</button>
-      <div class="top-mid">
-        <p id="top-kicker" class="kicker">한집한냥</p>
-        <p id="top-title" class="top-title">시작</p>
+      <div class="top-row">
+        <button type="button" id="btn-back" class="text-btn" hidden>레벨</button>
+        <div class="top-mid">
+          <p id="top-kicker" class="kicker">한집한냥</p>
+          <p id="top-title" class="top-title">시작</p>
+        </div>
+        <div class="top-stats">
+          <p id="gold-pill" class="gold" hidden>골드 40</p>
+          <div id="hearts" class="hearts" hidden></div>
+        </div>
       </div>
-      <div class="top-stats">
-        <p id="gold-pill" class="gold" hidden>골드 40</p>
-        <div id="hearts" class="hearts" hidden></div>
+      <div class="top-actions">
         <button type="button" id="btn-timer" class="text-btn timer-btn" hidden>시간</button>
         <button type="button" id="btn-pause" class="text-btn" hidden>일시정지</button>
+        <button type="button" id="btn-fullscreen" class="text-btn fs-btn" aria-pressed="false">전체 화면</button>
       </div>
     </header>
 

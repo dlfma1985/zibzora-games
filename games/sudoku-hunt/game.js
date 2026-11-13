@@ -35,6 +35,7 @@
   const backBtn = document.getElementById("btn-back");
   const pauseBtn = document.getElementById("btn-pause");
   const timerBtn = document.getElementById("btn-timer");
+  const fsBtn = document.getElementById("btn-fullscreen");
   const heartsEl = document.getElementById("hearts");
   const goldEl = document.getElementById("gold-pill");
   const kickerEl = document.getElementById("top-kicker");
@@ -73,6 +74,7 @@
   let dialogKind = "";
   let introStep = 0;
   let inputLock = false;
+  let fsTouchAt = 0;
 
   function pad(n) { return String(n).padStart(2, "0"); }
   function keyOf(r, c) { return r + "," + c; }
@@ -1158,6 +1160,45 @@
     if (btn) btn.focus();
   }
 
+  function currentFullscreen() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function syncFullscreenButton() {
+    if (!fsBtn) return;
+    const on = Boolean(currentFullscreen());
+    fsBtn.classList.toggle("is-on", on);
+    fsBtn.setAttribute("aria-pressed", on ? "true" : "false");
+    fsBtn.textContent = on ? "전체 화면 종료" : "전체 화면";
+  }
+
+  function toggleFullscreen() {
+    if (!fsBtn) return;
+    if (currentFullscreen()) {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (!exit) return;
+      const done = exit.call(document);
+      if (done && done.catch) done.catch(() => {});
+      return;
+    }
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (!req) {
+      fsBtn.textContent = "전체 화면 불가";
+      return;
+    }
+    let done;
+    try {
+      done = req.call(el, { navigationUI: "hide" });
+    } catch (err) {
+      try { done = req.call(el); } catch (err2) {
+        fsBtn.textContent = "전체 화면 불가";
+        return;
+      }
+    }
+    if (done && done.catch) done.catch(() => { fsBtn.textContent = "전체 화면 불가"; });
+  }
+
   function chooseMode(next) {
     mode = next;
     if (!save.seenIntro[mode]) {
@@ -1176,6 +1217,19 @@
     else if (screen === "play") showSelect();
   });
   pauseBtn.addEventListener("click", () => openDialog("pause"));
+  if (fsBtn) {
+    fsBtn.addEventListener("pointerup", (e) => {
+      if (e.pointerType === "mouse") return;
+      fsTouchAt = Date.now();
+      toggleFullscreen();
+    });
+    fsBtn.addEventListener("click", () => {
+      if (Date.now() - fsTouchAt < 800) return;
+      toggleFullscreen();
+    });
+  }
+  document.addEventListener("fullscreenchange", syncFullscreenButton);
+  document.addEventListener("webkitfullscreenchange", syncFullscreenButton);
   timerBtn.addEventListener("click", () => {
     if (tutorial() || touched || screen !== "play") return;
     timerOn = !timerOn;
@@ -1211,6 +1265,7 @@
     else startClock();
   });
 
+  syncFullscreenButton();
   showScreen("start");
 
   window.HUNT = {

@@ -10,7 +10,9 @@
   --heart: #d4534a;
   --shadow: 0 10px 30px rgba(70, 42, 18, 0.08);
   --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   --font: "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
 }
 
@@ -38,6 +40,13 @@ body {
   user-select: none;
   touch-action: manipulation;
   overscroll-behavior: none;
+  overflow: hidden;
+}
+html.is-top, html.is-top body, html.is-top #app {
+  height: 100%;
+  height: 100dvh;
+  max-height: 100%;
+  max-height: 100dvh;
 }
 button, p, h1 { font-family: inherit; }
 button { color: inherit; }
@@ -45,20 +54,35 @@ h1 { font-size: 1.7rem; line-height: 1.25; margin: 0; }
 .sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 #app {
-  min-height: 100%;
-  min-height: 100dvh;
+  height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   background: var(--bg);
 }
 
 .top {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: calc(6px + var(--safe-top)) calc(12px + var(--safe-right)) 6px calc(12px + var(--safe-left));
+  border-bottom: 1px solid var(--line);
+  flex: 0 0 auto;
+}
+.top-row {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: calc(8px + var(--safe-top)) 12px 8px;
-  border-bottom: 1px solid var(--line);
+  min-width: 0;
 }
+.top-actions { display: flex; gap: 8px; min-width: 0; }
+.top-actions > button {
+  flex: 1 1 auto;
+  min-width: max-content;
+  touch-action: manipulation;
+}
+.top-actions > .timer-btn { min-width: 64px; }
 .top-mid { flex: 1; min-width: 0; }
 .kicker {
   margin: 0;
@@ -67,12 +91,18 @@ h1 { font-size: 1.7rem; line-height: 1.25; margin: 0; }
   color: var(--accent);
   font-weight: 700;
 }
-.top-title { margin: 0; font-weight: 700; }
-.top-stats { display: flex; align-items: center; gap: 6px; }
+.top-title {
+  margin: 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.top-stats { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
 .gold, .hearts, .practice { margin: 0; font-size: 0.85rem; font-weight: 700; }
 .hearts { display: flex; align-items: center; gap: 2px; color: var(--heart); }
 .hearts .glyph { width: 18px; height: 18px; }
-.text-btn, .tool, .mode-btn, .lv, .result-actions button, .dialog button, .stuck button {
+.text-btn, .tool, .mode-btn, .lv, .result-actions button, .dialog button, .stuck button, .fs-btn {
   border: 0;
   background: var(--panel);
   border-radius: 12px;
@@ -82,16 +112,34 @@ h1 { font-size: 1.7rem; line-height: 1.25; margin: 0; }
   box-shadow: inset 0 0 0 1px var(--line);
 }
 .text-btn { min-width: 44px; }
-.timer-btn { min-width: 64px; font-variant-numeric: tabular-nums; }
+.timer-btn { font-variant-numeric: tabular-nums; }
+.fs-btn { white-space: nowrap; font-size: 0.92rem; }
+.fs-btn.is-on {
+  background: var(--accent);
+  color: #fffaf3;
+  box-shadow: none;
+}
+[data-mode="treasure"] .fs-btn.is-on { color: #1c2430; }
 .text-btn:disabled { opacity: 0.55; }
 
-main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.screen { padding: 16px 12px 12px; }
-.start, .result {
+main {
   flex: 1;
+  min-height: 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  width: 100%;
+}
+.screen {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px calc(12px + var(--safe-right)) calc(12px + var(--safe-bottom)) calc(12px + var(--safe-left));
+}
+.start, .result {
+  display: flex;
+  flex-direction: column;
+  justify-content: safe center;
   gap: 12px;
   width: min(520px, 100%);
   margin: 0 auto;
@@ -116,12 +164,26 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .lv.is-lock { opacity: 0.55; }
 .lv.is-lock .lv-stars { color: var(--muted); }
 
-.play { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: 10px; }
-#board-wrap { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.play {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+#board-wrap {
+  flex: 1 1 auto;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
 #board,
 .board {
   --n: 4;
-  width: min(520px, calc(100vw - 24px));
+  width: min(520px, calc(100vw - 24px - var(--safe-left) - var(--safe-right)), calc(100dvh - 15rem));
   display: grid;
   grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
   gap: 0;
@@ -129,6 +191,11 @@ main { flex: 1; min-height: 0; display: flex; flex-direction: column; }
   border-radius: 12px;
   overflow: hidden;
   background: var(--ink);
+}
+@supports (width: 1cqw) {
+  #board-wrap { container-type: size; container-name: board; }
+  #board,
+  .board { width: min(520px, 100cqw, 100cqh); }
 }
 .cell {
   position: relative;
@@ -217,7 +284,8 @@ button.cell {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
-  padding: 8px 12px calc(10px + var(--safe-bottom));
+  flex: 0 0 auto;
+  padding: 8px calc(12px + var(--safe-right)) calc(10px + var(--safe-bottom)) calc(12px + var(--safe-left));
   border-top: 1px solid var(--line);
   background: var(--bg);
 }
@@ -234,7 +302,7 @@ button.cell {
   z-index: 5;
   display: grid;
   place-items: center;
-  padding: 16px;
+  padding: calc(16px + var(--safe-top)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom)) calc(16px + var(--safe-left));
   background: rgba(28, 20, 12, 0.46);
 }
 [data-mode="treasure"] .overlay { background: rgba(6, 8, 12, 0.66); }
@@ -278,5 +346,96 @@ button.cell {
     clip: rect(0 0 0 0);
   }
 }
+
+/* Phone width, and a short window: the choices fill the screen. */
+@media (max-width: 800px), (max-height: 540px) {
+  .start, .result {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .mode-btn {
+    flex: 1 1 0;
+    justify-content: center;
+    min-height: 4.6rem;
+  }
+  .result-actions { margin-top: auto; }
+  #screen-select { display: flex; flex-direction: column; }
+  .lv-grid { flex: 1 1 auto; min-height: 0; align-content: stretch; }
+}
+@media (max-width: 800px) and (min-height: 541px) {
+  .lv-grid { grid-template-rows: repeat(6, minmax(44px, 1fr)); }
+}
+
+/* Wide screens and landscape phones: one header row. */
+@media (min-width: 900px), ((max-height: 540px) and (min-width: 500px)) {
+  .top { flex-direction: row; align-items: center; }
+  .top-actions { width: auto; flex: 0 0 auto; }
+  .top-actions > button { flex: 0 0 auto; }
+}
+
+@media (max-height: 540px) {
+  .kicker { display: none; }
+  .top { padding-top: calc(4px + var(--safe-top)); padding-bottom: 4px; }
+  .status { min-height: 1.3em; margin-top: 4px; font-size: 0.85rem; }
+  h1 { font-size: 1.25rem; }
+  .screen { padding-top: 8px; }
+}
+
+/* Landscape phones: tools beside the board so the grid stays tappable. */
+@media (max-height: 540px) and (min-width: 500px) {
+  #app[data-screen="play"] {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(9.5rem, 30vw);
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      "top top"
+      "main tools";
+  }
+  #app[data-screen="play"] > .top { grid-area: top; }
+  #app[data-screen="play"] > main { grid-area: main; min-height: 0; min-width: 0; }
+  #app[data-screen="play"] > .tools {
+    grid-area: tools;
+    align-self: stretch;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    border-top: 0;
+    border-left: 1px solid var(--line);
+    padding: 8px calc(8px + var(--safe-right)) calc(8px + var(--safe-bottom)) 8px;
+  }
+  #app[data-screen="play"] > .tools .tool { height: 100%; min-height: 44px; }
+  .play { padding-right: 8px; padding-bottom: 8px; }
+  .lv-grid {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(44px, 1fr));
+  }
+  .start {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-content: center;
+    justify-content: center;
+    width: min(720px, 100%);
+  }
+  .start h1, .start .lede { grid-column: 1 / -1; }
+  .result {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 16rem);
+    align-items: center;
+    align-content: center;
+    width: min(720px, 100%);
+    column-gap: 16px;
+  }
+  .result > :not(.result-actions) { grid-column: 1; }
+  .result-actions { grid-column: 2; grid-row: 1 / span 8; margin-top: 0; }
+}
+
+html:fullscreen, html:-webkit-full-screen {
+  background: var(--bg);
+  height: 100%;
+}
+html:fullscreen #app, html:-webkit-full-screen #app {
+  height: 100%;
+  max-height: none;
+}
+
 :focus { outline: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
