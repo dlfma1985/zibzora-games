@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#10151c" />
+  <title>메모리 퀴즈</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    try {
+      if (window.top === window.self) document.documentElement.classList.add("is-top");
+    } catch (err) { /* framed page keeps the iframe height */ }
+  </script>
+</head>
+<body>
+  <div id="app" data-screen="home">
+    <header class="top">
+      <div class="top-row">
+        <button type="button" id="btn-back" class="text-btn" hidden>목록</button>
+        <div class="top-mid">
+          <p class="kicker">메모리 퀴즈</p>
+          <p id="top-title" class="top-title">시작</p>
+        </div>
+        <div class="top-stats">
+          <p id="progress" class="progress" hidden>1 / 3</p>
+          <p id="timer" class="timer" role="timer" hidden>00:00.0</p>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button type="button" id="btn-fullscreen" class="text-btn fs-btn" aria-pressed="false">전체 화면</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="screen-home" class="screen">
+        <div class="intro">
+          <h1>메모리 퀴즈</h1>
+          <p class="lede">글을 외운 뒤 문제를 풀어 보세요. 단계가 높을수록 글이 길고 문제가 많습니다.</p>
+          <p class="note">최고 기록은 이 기기에 남습니다.</p>
+        </div>
+        <div id="level-pick" class="level-pick"></div>
+        <noscript><p class="lede">스크립트를 켜면 플레이할 수 있어요.</p></noscript>
+      </section>
+
+      <section id="screen-memorize" class="screen" hidden>
+        <div class="memo-head">
+          <h1 id="memo-title"></h1>
+          <p id="count-wrap" class="count-wrap"><span id="memo-count">0</span><span class="unit">초</span></p>
+        </div>
+        <p class="lede memo-help">다 외우면 누르세요. 시간이 끝나면 문제가 시작됩니다.</p>
+        <div class="passage-wrap">
+          <article id="passage" class="passage" tabindex="0" aria-label="외울 글"></article>
+          <p id="passage-more" class="passage-more" hidden>아래로 더 있어요</p>
+        </div>
+        <button type="button" id="btn-ready" class="primary">외웠어요</button>
+      </section>
+
+      <section id="screen-quiz" class="screen" hidden>
+        <p id="feedback" class="feedback" role="status" aria-live="polite"></p>
+        <h1 id="prompt"></h1>
+        <div id="choices" class="choices" role="group" aria-labelledby="prompt"></div>
+      </section>
+
+      <section id="screen-result" class="screen" hidden>
+        <div class="result-copy">
+          <p class="kicker">결과</p>
+          <h1 id="result-tier"></h1>
+          <p id="result-title" class="lede"></p>
+          <p id="result-correct" class="stat"></p>
+          <p class="time-label">걸린 시간</p>
+          <p id="result-time" class="time">00:00.0</p>
+          <p id="result-best" class="lede"></p>
+          <p id="result-note" class="note"></p>
+        </div>
+        <div class="result-actions">
+          <button type="button" id="btn-again" class="secondary">다시 하기</button>
+          <button type="button" id="btn-home" class="primary">목록으로</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="levels.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
